@@ -1,0 +1,655 @@
+---
+title: "INESCAPtABLE"
+author: "You"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+Discover hidden messages to find your way out
+
+```{r}
+library(dplyr)
+```
+
+```{r}
+gsheet_url <- "https://docs.google.com/spreadsheets/d/1XuC5QCF-ulwKjhnn3bq01EvfWYQWR7F15c5OVMXK4D4/export?format=csv&gid=1341391250#gid=1341391250"
+
+manor <- read.csv(gsheet_url) %>%
+  select(
+    room, item, description,
+    weight_kg, length_m, emf_reading,
+    inspect, key
+  )
+
+manor[manor == ""] <- NA
+```
+
+BEWARE! Spooky context coming 👻😱
+
+```
+oOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOOOOOOOoooooooo
+ooooooOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOOOOOOOooo
+oooooooooooOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOOOOO
+OOOoooooooooooOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOO
+OOOOOOOOoooooooooooOOOOOOOOOooooooooOOOOOOOOOooooooooooooo
+```
+
+You wake up in fog in a weird looking house. You don't remember how you got here, must be dreaming... right? You move to take a step, but a loud creeeaaaaaakkk paralyzes you. Quickly, carefully, you glance down; what catches your eye isn't the beautiful oak floors, but a rolled up piece of paper sticking out of your sock.  You pull it out and unroll it.  It's a note.
+
+You try to read the hastily written note. It's in you're own handwriting, and the penmanship is as good as it is ever is...but you can't read it...the only thing you can make out in tiny writing in the corner it says `key = 42`. Besides that the note reads:
+
+```
+v5.G4UUTG 5GWU G5. G5VGXU8UOG45G Y3UGV58GTU QY29HGd5GY496US G XUGY U39G&5.GSQ4HGGfI'UG2UV GS2.U9GQ85.4TG XUGX5.9UG54GX5\"G 5G2UQ'UG XY9G3Y9U8QR2UG62QSUHGGtUGS5.2T4I G8Y91GRUY4WGV5.4TG5. PG95G XUGS2.U9GQ8U4I G'U8&GTY8US HG
+```
+
+The mention of `key = 42` has to mean something about how to decipher the note.... at least that's what we have to hope.
+
+```
+OOOOOOOOoooooooooooOOOOOOOOOooooooooOOOOOOOOOooooooooooooo
+OOOoooooooooooOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOO
+oooooooooooOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOOOOO
+ooooooOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOOOOOOOooo
+oOOOOOOOOOooooooooOOOOOOOOOoooooooooooooOOOOOOOOOOoooooooo
+```
+
+## An aside for encryption tools
+
+You'll need some tools before you start investigating.
+
+Run the below cell to load some decryption tools!
+
+```{r}
+# Load
+source("https://tiny.utk.edu/caesar_cypher.R")
+
+# Check the needed functions loaded (throw error if missing)
+req_funcs <- c("to_chars", "normalize_index", "encode", "decode")
+stopifnot(all(req_funcs %in% ls()))
+```
+
+<center>
+ <img src="https://treasures2remember.com/wp-content/uploads/2016/11/RW013.jpg" width="20%">
+</center>
+
+The encrypted messages you'll encounter were encoded using a "Caesar cypher".  A Caesar cypher is a simple way to encrypt info by shifting the alphabet.  If you want to learn more about it check out this short video: https://www.youtube.com/watch?v=l6jqKRXSShI
+
+We don't have to concern ourselves with that too much though.  Here's how we'll use the functions loaded for us above.
+
+```{r}
+# Encrypt a message
+encoded <- encode("abc", key = 2)
+print(encoded)
+
+# Decrypt the encrypted message using the same key
+decode(encoded, key = 2)
+```
+
+```{r}
+msg <- "Rocky Top, you'll always be home sweet home to me!!!"
+
+# Encrypt a message
+encoded <- encode(msg, key = 865)
+print(encoded)
+
+# Decrypt the encrypted message using the same key
+decode(encoded, key = 865)
+```
+
+## An intro to the `manor` 🏚️
+
+Where you've found yourself trapped is known as the Inescaptable\* Manor.  Below is all you'll need to get started.  Read each comment, run each line of code, and view it's output to get up to speed.
+
+<sub>\*it says "table" and its an escape room theme... get it... ?
+
+```{r}
+# Each row is an item you can come across
+names(manor)
+```
+
+```{r}
+# Each item has attributes about it's location, weight, description
+manor[1, c("room", "item", "description", "weight_kg"), TRUE]
+```
+
+```{r}
+# Each item also has an encrypted message
+manor$inspect[1]
+```
+
+```{r}
+# A few items have their encryption key included
+manor$key[1]
+```
+
+```{r}
+# Most don't
+manor$key[2:16]
+```
+
+```{r}
+# If you use the item's correct key you can decrypt the hidden message
+decode(manor$inspect[1], 42)
+```
+
+Start by finding which items don't have missing `key`s.
+
+```{r}
+manor %>% 
+  filter(!is.na(key)) %>% 
+  filter(item != "Note")
+```
+
+There are 3 different items (in addition to the Note) with non NA keys; one item in the Kitchen, one in the Billiard Room, and one in the Library.
+
+Each of these 3 items are the starts of paths to exit this godforsaken manor.
+
+Each path has a section below with starter code.
+
+Start with Path 1 to have a walk through to get started.  There is minimal instructions in the Path 2 & Path 3 sections.
+
+## Path 1 - Kitchen
+
+### Item 1
+
+This code finds the only row in the Kitchen with key already provided and deciphers it's hidden message.
+
+```{r}
+# Filter to the row that you're after
+# Here we want a row with non NA value in `key` column 
+# and `room` should be "Kitchen"
+row <- manor %>% 
+  filter(!is.na(key)) %>% 
+  filter(room == "Kitchen")
+
+# Assign the value of the key to a special `key` variable
+key <- row$key
+
+# Once you have that row number you can decode the message with:
+# (assumes you name your row number `i`)
+decode(row$inspect, key)
+```
+
+If all went according to plan you should see a message printed in English and not gibberish.  All of these messages have clues that lead to the both next **item** and the **key** you need to read that item's message.  Some clues are more direct than others.
+
+### Item 2
+
+It's up to you now.  Use the provided code + comments to help, but don't hesitate to ask for help if you get stuck.
+
+... good luck ...
+
+* Go to item: Piano
+* Key: 101
+
+```{r}
+# Filter to the row the clue leads to
+row <- manor %>% 
+  filter(item == )
+
+# Use the key that the clue leads you to
+key <- 
+
+# Decode the row's message with the key
+decode(___$inspect, ___)
+```
+
+### Item 3
+
+Repeat that process of finding the new row, finding new key, decoding the message for that row using that key. I have faith in you, do you? (you should)
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 4
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 5
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 6
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 7
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 8
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 9
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 10
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 11
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 12
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 13
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 14
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 15
+
+* Go to item:
+* Key:
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+**You've reached an exit!**
+
+## Path 2 - Library
+
+**NOTE - UNDER CONSTRUCTION - PATH IS NOT COMPLETE**
+
+### Item 1
+
+```{r}
+# Filter to the row that you're after
+# Here we want a row with non NA value in `key` column 
+# and `room` should be "Kitchen"
+row <- manor %>% 
+  filter(!is.na(key)) %>% 
+  filter(room == "Library")
+
+# Assign the value of the key to a special `key` variable
+key <- row$key
+
+# Once you have that row number you can decode the message with:
+# (assumes you name your row number `i`)
+decode(row$inspect, key)
+```
+
+You're on you're own for the rest.  Go back and work Path 1 if you're stuck getting started.
+
+### Item 2
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 3
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 4
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 5
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 6
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 7
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 8
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 9
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 10
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 11
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 12
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 13
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 14
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 15
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+## Path 3 - Billiard Room
+
+**NOTE - UNDER CONSTRUCTION - PATH IS NOT COMPLETE**
+
+### Item 1
+
+```{r}
+# Filter to the row that you're after
+# Here we want a row with non NA value in `key` column 
+# and `room` should be "Kitchen"
+row <- manor %>% 
+  filter(!is.na(key)) %>% 
+  filter(room == "Billiard Room")
+
+# Assign the value of the key to a special `key` variable
+key <- row$key
+
+# Once you have that row number you can decode the message with:
+# (assumes you name your row number `i`)
+decode(row$inspect, key)
+```
+
+You're on you're own for the rest.  Go back and work Path 1 if you're stuck getting started.
+
+### Item 2
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 3
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 4
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 5
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 6
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 7
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 8
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 9
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 10
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 11
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 12
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 13
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 14
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
+
+### Item 15
+
+* Go to item:
+* Key: 
+
+```{r}
+# Decode the row's message with the key
+decode(row$inspect, key)
+```
