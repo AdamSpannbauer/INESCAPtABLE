@@ -7,7 +7,9 @@ To escape the manor you have to decipher clues, manipulate data, and even build 
 
 -----
 
-Audio intro: [mp3](INESCAPtABLE-tts-intro.mp3)
+Audio intro: 
+
+<audio controls>   <source src="INESCAPtABLE-tts-intro.mp3" type="audio/mpeg">   Your browser does not support the audio element. </audio>
 
 Text intro:
 
