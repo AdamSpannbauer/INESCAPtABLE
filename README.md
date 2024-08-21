@@ -1,17 +1,13 @@
 # INESCAPtABLE
 <p align="center"><img width="20%" src="INESCAPtABLE-manor.png"></p>
 
-Escape from the manor - a CSV based escape room (intended but not limited to R).  Play the game by downloading [INESCAPtABLE.Rmd](INESCAPtABLE.Rmd), reading the prompts, & solving the clues to decrypt hidden messgaes.
+Escape from the manor - a CSV based escape room (intended but not limited to R).
+
+Play the game by downloading [INESCAPtABLE.Rmd](INESCAPtABLE.Rmd), reading the prompts, & solving the clues to decrypt hidden messgaes.
 
 To escape the manor you have to decipher clues, manipulate data, and even build a linear regression model.
 
 -----
-
-Audio intro: 
-
-<audio controls>   <source src="INESCAPtABLE-tts-intro.mp3" type="audio/mpeg">   Your browser does not support the audio element. </audio>
-
-Text intro:
 
 > You wake up in a fog in a weird-looking house. You don't remember how you got here; you must be dreaming. You move to take a step, but a loud creak paralyzes you. Quickly, carefully, you glance down; what catches your eye isn't the beautiful oak floors but a rolled-up piece of paper sticking out of your sock. You pull it out and unroll it. It's a note.
 >
