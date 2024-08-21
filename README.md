@@ -1,5 +1,5 @@
 # INESCAPtABLE
-<p align="center"><img width="20%" src="INESCAPtABLE-manor.png"></p>
+<p align="center"><img width="20%" src="readme/INESCAPtABLE-manor.png"></p>
 
 Escape from the manor - a CSV based escape room (intended but not limited to R).
 
